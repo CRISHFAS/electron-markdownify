@@ -16,13 +16,9 @@ const appDetails = require('./package.json');
 
 var localShortcut = require('electron-localshortcut');
 
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
-// let mainWindow;
 let isQuitting = false;
 
 var createWindow = () => {
-    // Create the browser window.
     let mainWindow = new BrowserWindow({
         width: 1400,
         height: 800,
@@ -33,17 +29,9 @@ var createWindow = () => {
         }
     });
 
-    // and load the index.html of the app.
     mainWindow.loadURL(mainPage);
 
-    // Open the DevTools.
-    //mainWindow.webContents.openDevTools();
-
-    // Emitted when the window is closed.
     mainWindow.on('closed', () => {
-        // Dereference the window object, usually you would store windows
-        // in an array if your app supports multi windows, this is the time
-        // when you should delete the corresponding element.
         mainWindow = null;
     });
 
@@ -58,17 +46,15 @@ var createWindow = () => {
         }
     });
 
-    //Open anchor links in browser
     mainWindow.webContents.on('will-navigate', (e, url) => {
         e.preventDefault();
         shell.openExternal(url);
     });
 
-    //Set native menubar
     var template = [{
-            label: "&File",
+            label: "&Archivo",
             submenu: [{
-                    label: "New",
+                    label: "Nuevo",
                     accelerator: "CmdOrCtrl+N",
                     click: () => {
                         var focusedWindow = BrowserWindow.getFocusedWindow();
@@ -76,7 +62,7 @@ var createWindow = () => {
                     }
                 },
                 {
-                    label: "Open",
+                    label: "Abrir",
                     accelerator: "CmdOrCtrl+O",
                     click: () => {
                         let focusedWindow = BrowserWindow.getFocusedWindow();
@@ -84,7 +70,7 @@ var createWindow = () => {
                     }
                 },
                 {
-                    label: "Save",
+                    label: "Guardar",
                     accelerator: "CmdOrCtrl+S",
                     click: () => {
                         let focusedWindow = BrowserWindow.getFocusedWindow();
@@ -92,7 +78,7 @@ var createWindow = () => {
                     }
                 },
                 {
-                    label: "Save As",
+                    label: "Guardar como",
                     accelerator: "CmdOrCtrl+Shift+S",
                     click: () => {
                         var focusedWindow = BrowserWindow.getFocusedWindow();
@@ -100,7 +86,7 @@ var createWindow = () => {
                     }
                 },
                 {
-                    label: "Save As PDF",
+                    label: "Guardar como PDF",
                     accelerator: "CmdOrCtrl+Shift+P",
                     click: () => {
                         var focusedWindow = BrowserWindow.getFocusedWindow();
@@ -108,21 +94,21 @@ var createWindow = () => {
                     }
                 },
                 {
-                    label: "Quit",
+                    label: "Quitar",
                     accelerator: "Command+Q",
                     click: app.quit
                 }
             ]
         },
         {
-            label: "&Edit",
+            label: "&Editar",
             submenu: [{
-                    label: "Undo",
+                    label: "Deshacer",
                     accelerator: "CmdOrCtrl+Z",
                     role: "undo"
                 },
                 {
-                    label: "Redo",
+                    label: "Rehacer",
                     accelerator: "Shift+CmdOrCtrl+Z",
                     role: "redo"
                 },
@@ -130,22 +116,22 @@ var createWindow = () => {
                     type: "separator"
                 },
                 {
-                    label: "Cut",
+                    label: "Cortar",
                     accelerator: "CmdOrCtrl+X",
                     role: "cut"
                 },
                 {
-                    label: "Copy",
+                    label: "Copar",
                     accelerator: "CmdOrCtrl+C",
                     role: "copy"
                 },
                 {
-                    label: "Paste",
+                    label: "Pegar",
                     accelerator: "CmdOrCtrl+V",
                     role: "paste"
                 },
                 {
-                    label: "Select All",
+                    label: "Seleccionar todo",
                     accelerator: "CmdOrCtrl+A",
                     role: 'selectall'
                 },
@@ -153,7 +139,7 @@ var createWindow = () => {
                     type: "separator"
                 },
                 {
-                    label: "Search",
+                    label: "Buscar",
                     accelerator: "CmdOrCtrl+F",
                     click: () => {
                         let focusedWindow = BrowserWindow.getFocusedWindow();
@@ -161,7 +147,7 @@ var createWindow = () => {
                     }
                 },
                 {
-                    label: "Replace",
+                    label: "Reemplazar",
                     accelerator: "CmdOrCtrl+Shift+F",
                     click: () => {
                         let focusedWindow = BrowserWindow.getFocusedWindow();
@@ -171,16 +157,16 @@ var createWindow = () => {
             ]
         },
         {
-            label: "&View",
+            label: "&Ver",
             submenu: [{
-                label: "Toggle Full Screen",
+                label: "Cambiar a pantalla completa",
                 accelerator: "F11",
                 click: () => {
                     let focusedWindow = BrowserWindow.getFocusedWindow();
                     let isFullScreen = focusedWindow.isFullScreen();
                     focusedWindow.setFullScreen(!isFullScreen);
                 },
-                label: "Toggle a Screen",
+                label: "Alternar una pantalla",
                 accelerator: "F11",
                 click: () => {
                     let focusedWindow = mainWindow.openDevTools();
@@ -188,7 +174,7 @@ var createWindow = () => {
             }]
         },
         {
-            label: "&Themes",
+            label: "&Temas",
             submenu: [{
                 label: "Nord",
                 click: () => {
@@ -222,23 +208,23 @@ var createWindow = () => {
             }]
         },
         {
-            label: "&Help",
+            label: "&Ayuda",
             submenu: [{
-                    label: "Documentation",
+                    label: "Documentación",
                     click: () => {
                         shell.openExternal(appDetails.repository.docs);
                     }
                 },
                 {
-                    label: "Report Issue",
+                    label: "Informar un problema",
                     click: () => {
                         shell.openExternal(appDetails.bugs.url);
                     }
                 },
                 {
-                    label: "About Markdownify",
+                    label: "Acerca de Markdownify",
                     click: () => {
-                        dialog.showMessageBox({ title: "About Markdownify", type: "info", message: "A minimal Markdown Editor desktop app. \nMIT Copyright (c) 2020 Amit Merchant <bullredeyes@gmail.com>", buttons: ["Close"] });
+                        dialog.showMessageBox({ title: "Acerca de Markdownify", type: "info", message: "Una aplicación de escritorio de edición Markdown minimalista. \nCopyright (c) 2020", buttons: ["Cerrar"] });
                     }
                 }
             ]
@@ -248,7 +234,6 @@ var createWindow = () => {
     ipcMain.on('print-to-pdf', (event, filePath) => {
 
         const win = BrowserWindow.fromWebContents(event.sender)
-            // Use default printing options
         win.webContents.printToPDF({ pageSize: 'A4' }, (error, data) => {
             if (error) throw error
             fs.writeFile(filePath, data, (error) => {
@@ -262,7 +247,6 @@ var createWindow = () => {
 
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 
-    // Registering shortcuts for formatting markdown
     localShortcut.register(mainWindow, 'Ctrl+B', () => {
         mainWindow.webContents.send('ctrl+b');
     });
@@ -294,22 +278,15 @@ var createWindow = () => {
     tray.create(mainWindow);
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
 app.on('ready', createWindow);
 
-// Quit when all windows are closed.
 app.on('window-all-closed', () => {
-    // On OS X it is common for applications and their menu bar
-    // to stay active until the user quits explicitly with Cmd + Q
     if (process.platform !== 'darwin') {
         app.quit();
     }
 });
 
 app.on('activate', () => {
-    // On OS X it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (mainWindow === null) {
         createWindow();
     }

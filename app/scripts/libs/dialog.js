@@ -1,14 +1,9 @@
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-// Open simple dialogs on top of an editor. Relies on dialog.css.
-
 (function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
+  if (typeof exports == "object" && typeof module == "object") 
     mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
+  else if (typeof define == "function" && define.amd)
     define(["../../lib/codemirror"], mod);
-  else // Plain browser env
+  else 
     mod(CodeMirror);
 })(function(CodeMirror) {
   function dialogDiv(cm, template, bottom) {
@@ -22,7 +17,7 @@
 
     if (typeof template == "string") {
       dialog.innerHTML = template;
-    } else { // Assuming it's a detached DOM element.
+    } else { 
       dialog.appendChild(template);
     }
     return dialog;
@@ -123,14 +118,6 @@
     }
   });
 
-  /*
-   * openNotification
-   * Opens a notification, that can be closed with an optional timer
-   * (default 5000ms timer) and always closes on click.
-   *
-   * If a notification is opened while another is opened, it will close the
-   * currently opened one and open the new one immediately.
-   */
   CodeMirror.defineExtension("openNotification", function(template, options) {
     closeNotification(this, close);
     var dialog = dialogDiv(this, template, options && options.bottom);

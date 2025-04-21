@@ -1,26 +1,13 @@
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-// This is CodeMirror (http://codemirror.net), a code editor
-// implemented in JavaScript on top of the browser's DOM.
-//
-// You can find some technical background for some of the code below
-// at http://marijnhaverbeke.nl/blog/#cm-internals .
-
 (function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
+  if (typeof exports == "object" && typeof module == "object") 
     module.exports = mod();
-  else if (typeof define == "function" && define.amd) // AMD
+  else if (typeof define == "function" && define.amd) 
     return define([], mod);
-  else // Plain browser env
+  else 
     (this || window).CodeMirror = mod();
 })(function() {
   "use strict";
 
-  // BROWSER SNIFFING
-
-  // Kludges for bugs and behavior differences that can't be feature
-  // detected are enabled based on userAgent etc sniffing.
   var userAgent = navigator.userAgent;
   var platform = navigator.platform;
 
@@ -38,7 +25,6 @@
   var phantom = /PhantomJS/.test(userAgent);
 
   var ios = /AppleWebKit/.test(userAgent) && /Mobile\/\w+/.test(userAgent);
-  // This is woefully incomplete. Suggestions for alternative methods welcome.
   var mobile = ios || /Android|webOS|BlackBerry|Opera Mini|Opera Mobi|IEMobile/i.test(userAgent);
   var mac = ios || /Mac/.test(platform);
   var chromeOS = /\bCrOS\b/.test(userAgent);
@@ -47,23 +33,15 @@
   var presto_version = presto && userAgent.match(/Version\/(\d*\.\d*)/);
   if (presto_version) presto_version = Number(presto_version[1]);
   if (presto_version && presto_version >= 15) { presto = false; webkit = true; }
-  // Some browsers use the wrong event properties to signal cmd/ctrl on OS X
   var flipCtrlCmd = mac && (qtwebkit || presto && (presto_version == null || presto_version < 12.11));
   var captureRightClick = gecko || (ie && ie_version >= 9);
 
-  // Optimize some code when these features are not used.
   var sawReadOnlySpans = false, sawCollapsedSpans = false;
-
-  // EDITOR CONSTRUCTOR
-
-  // A CodeMirror instance represents an editor. This is the object
-  // that user code is usually dealing with.
 
   function CodeMirror(place, options) {
     if (!(this instanceof CodeMirror)) return new CodeMirror(place, options);
 
     this.options = options = options ? copyObj(options) : {};
-    // Determine effective options based on given values and defaults.
     copyObj(defaults, options, false);
     setGuttersForLineNumbers(options);
 
@@ -82,25 +60,23 @@
     initScrollbars(this);
 
     this.state = {
-      keyMaps: [],  // stores maps added by addKeyMap
-      overlays: [], // highlighting overlays, as added by addOverlay
-      modeGen: 0,   // bumped when mode/overlay changes, used to invalidate highlighting info
+      keyMaps: [],  
+      overlays: [], 
+      modeGen: 0,   
       overwrite: false,
       delayingBlurEvent: false,
       focused: false,
-      suppressEdits: false, // used to disable editing during key handlers when in readOnly mode
-      pasteIncoming: false, cutIncoming: false, // help recognize paste/cut edits in input.poll
+      suppressEdits: false, 
+      pasteIncoming: false, cutIncoming: false, 
       selectingText: false,
       draggingText: false,
-      highlight: new Delayed(), // stores highlight worker timeout
-      keySeq: null,  // Unfinished key sequence
+      highlight: new Delayed(), 
+      keySeq: null,  
       specialChars: null
     };
 
     var cm = this;
 
-    // Override magic textarea content restore that IE sometimes does
-    // on our hidden textarea on reload
     if (ie && ie_version < 11) setTimeout(function() { cm.display.input.reset(true); }, 20);
 
     registerEventHandlers(this);
@@ -121,61 +97,37 @@
     if (options.finishInit) options.finishInit(this);
     for (var i = 0; i < initHooks.length; ++i) initHooks[i](this);
     endOperation(this);
-    // Suppress optimizelegibility in Webkit, since it breaks text
-    // measuring on line wrapping boundaries.
+    
     if (webkit && options.lineWrapping &&
         getComputedStyle(display.lineDiv).textRendering == "optimizelegibility")
       display.lineDiv.style.textRendering = "auto";
   }
 
-  // DISPLAY CONSTRUCTOR
-
-  // The display handles the DOM integration, both for input reading
-  // and content drawing. It holds references to DOM nodes and
-  // display-related state.
-
   function Display(place, doc, input) {
     var d = this;
     this.input = input;
 
-    // Covers bottom-right square when both scrollbars are present.
     d.scrollbarFiller = elt("div", null, "CodeMirror-scrollbar-filler");
-    d.scrollbarFiller.setAttribute("cm-not-content", "true");
-    // Covers bottom of gutter when coverGutterNextToScrollbar is on
-    // and h scrollbar is present.
+    d.scrollbarFiller.setAttribute("cm-not-content", "true");    
     d.gutterFiller = elt("div", null, "CodeMirror-gutter-filler");
     d.gutterFiller.setAttribute("cm-not-content", "true");
-    // Will contain the actual code, positioned to cover the viewport.
     d.lineDiv = elt("div", null, "CodeMirror-code");
-    // Elements are added to these to represent selection and cursors.
     d.selectionDiv = elt("div", null, null, "position: relative; z-index: 1");
     d.cursorDiv = elt("div", null, "CodeMirror-cursors");
-    // A visibility: hidden element used to find the size of things.
     d.measure = elt("div", null, "CodeMirror-measure");
-    // When lines outside of the viewport are measured, they are drawn in this.
-    d.lineMeasure = elt("div", null, "CodeMirror-measure");
-    // Wraps everything that needs to exist inside the vertically-padded coordinate system
+    d.lineMeasure = elt("div", null, "CodeMirror-measure");    
     d.lineSpace = elt("div", [d.measure, d.lineMeasure, d.selectionDiv, d.cursorDiv, d.lineDiv],
                       null, "position: relative; outline: none");
-    // Moved around its parent to cover visible view.
     d.mover = elt("div", [elt("div", [d.lineSpace], "CodeMirror-lines")], null, "position: relative");
-    // Set to the height of the document, allowing scrolling.
     d.sizer = elt("div", [d.mover], "CodeMirror-sizer");
-    d.sizerWidth = null;
-    // Behavior of elts with overflow: auto and padding is
-    // inconsistent across browsers. This is used to ensure the
-    // scrollable area is big enough.
+    d.sizerWidth = null;    
     d.heightForcer = elt("div", null, null, "position: absolute; height: " + scrollerGap + "px; width: 1px;");
-    // Will contain the gutters, if any.
     d.gutters = elt("div", null, "CodeMirror-gutters");
     d.lineGutter = null;
-    // Actual scrollable element.
     d.scroller = elt("div", [d.sizer, d.heightForcer, d.gutters], "CodeMirror-scroll");
     d.scroller.setAttribute("tabIndex", "-1");
-    // The element in which the editor lives.
     d.wrapper = elt("div", [d.scrollbarFiller, d.gutterFiller, d.scroller], "CodeMirror");
 
-    // Work around IE7 z-index bug (not perfect, hence IE7 not really being supported)
     if (ie && ie_version < 8) { d.gutters.style.zIndex = -1; d.scroller.style.paddingRight = 0; }
     if (!webkit && !(gecko && mobile)) d.scroller.draggable = true;
 
@@ -184,57 +136,29 @@
       else place(d.wrapper);
     }
 
-    // Current rendered range (may be bigger than the view window).
     d.viewFrom = d.viewTo = doc.first;
     d.reportedViewFrom = d.reportedViewTo = doc.first;
-    // Information about the rendered lines.
     d.view = [];
-    d.renderedView = null;
-    // Holds info about a single rendered line when it was rendered
-    // for measurement, while not in view.
+    d.renderedView = null;    
     d.externalMeasured = null;
-    // Empty space (in pixels) above the view
     d.viewOffset = 0;
     d.lastWrapHeight = d.lastWrapWidth = 0;
     d.updateLineNumbers = null;
-
     d.nativeBarWidth = d.barHeight = d.barWidth = 0;
-    d.scrollbarsClipped = false;
-
-    // Used to only resize the line number gutter when necessary (when
-    // the amount of lines crosses a boundary that makes its width change)
-    d.lineNumWidth = d.lineNumInnerWidth = d.lineNumChars = null;
-    // Set to true when a non-horizontal-scrolling line widget is
-    // added. As an optimization, line widget aligning is skipped when
-    // this is false.
+    d.scrollbarsClipped = false;  
+    d.lineNumWidth = d.lineNumInnerWidth = d.lineNumChars = null;    
     d.alignWidgets = false;
-
     d.cachedCharWidth = d.cachedTextHeight = d.cachedPaddingH = null;
-
-    // Tracks the maximum line length so that the horizontal scrollbar
-    // can be kept static when scrolling.
     d.maxLine = null;
     d.maxLineLength = 0;
     d.maxLineChanged = false;
-
-    // Used for measuring wheel scrolling granularity
     d.wheelDX = d.wheelDY = d.wheelStartX = d.wheelStartY = null;
-
-    // True when shift is held down.
     d.shift = false;
-
-    // Used to track whether anything happened since the context menu
-    // was opened.
     d.selForContextMenu = null;
-
     d.activeTouch = null;
 
     input.init(d);
   }
-
-  // STATE UPDATES
-
-  // Used to get the editor into a consistent state again when options change.
 
   function loadMode(cm) {
     cm.doc.mode = CodeMirror.getMode(cm.options, cm.doc.modeOption);
@@ -267,9 +191,6 @@
     setTimeout(function(){updateScrollbars(cm);}, 100);
   }
 
-  // Returns a function that estimates the height of a line, to use as
-  // first approximation until the line becomes visible (and is thus
-  // properly measurable).
   function estimateHeight(cm) {
     var th = textHeight(cm.display), wrapping = cm.options.lineWrapping;
     var perLine = wrapping && Math.max(5, cm.display.scroller.clientWidth / charWidth(cm.display) - 3);
@@ -308,8 +229,6 @@
     setTimeout(function(){alignHorizontally(cm);}, 20);
   }
 
-  // Rebuild the gutter elements, ensure the margin to the left of the
-  // code matches their width.
   function updateGutters(cm) {
     var gutters = cm.display.gutters, specs = cm.options.gutters;
     removeChildren(gutters);
@@ -330,9 +249,6 @@
     cm.display.sizer.style.marginLeft = width + "px";
   }
 
-  // Compute the character length of a line, taking into account
-  // collapsed ranges (see markText) that might hide parts, and join
-  // other lines onto it.
   function lineLength(line) {
     if (line.height == 0) return 0;
     var len = line.text.length, merged, cur = line;
@@ -351,7 +267,6 @@
     return len;
   }
 
-  // Find the longest line in the document.
   function findMaxLine(cm) {
     var d = cm.display, doc = cm.doc;
     d.maxLine = getLine(doc, doc.first);
@@ -366,8 +281,6 @@
     });
   }
 
-  // Make sure the gutters options contains the element
-  // "CodeMirror-linenumbers" when the lineNumbers option is true.
   function setGuttersForLineNumbers(options) {
     var found = indexOf(options.gutters, "CodeMirror-linenumbers");
     if (found == -1 && options.lineNumbers) {
@@ -378,10 +291,6 @@
     }
   }
 
-  // SCROLLBARS
-
-  // Prepare DOM reads needed to update the scrollbars. Done in one
-  // shot to minimize update/measure roundtrips.
   function measureForScrollbars(cm) {
     var d = cm.display, gutterW = d.gutters.offsetWidth;
     var docH = Math.round(cm.doc.height + paddingVert(cm.display));
@@ -412,7 +321,7 @@
     });
 
     this.checkedZeroWidth = false;
-    // Need to set a minimum width to see the scrollbar on IE7 (but must not set it on IE8).
+  
     if (ie && ie_version < 8) this.horiz.style.minHeight = this.vert.style.minWidth = "18px";
   }
 
@@ -426,7 +335,6 @@
         this.vert.style.display = "block";
         this.vert.style.bottom = needsH ? sWidth + "px" : "0";
         var totalHeight = measure.viewHeight - (needsH ? sWidth : 0);
-        // A bug in IE8 can cause this value to be negative, so guard it.
         this.vert.firstChild.style.height =
           Math.max(0, measure.scrollHeight - measure.clientHeight + totalHeight) + "px";
       } else {
@@ -471,12 +379,6 @@
     enableZeroWidthBar: function(bar, delay) {
       bar.style.pointerEvents = "auto";
       function maybeDisable() {
-        // To find out whether the scrollbar is still visible, we
-        // check whether the element under the pixel in the bottom
-        // left corner of the scrollbar box is the scrollbar box
-        // itself (when the bar is still visible) or its filler child
-        // (when the bar is hidden). If it is still visible, we keep
-        // it enabled, if it's hidden, we disable pointer events.
         var box = bar.getBoundingClientRect();
         var elt = document.elementFromPoint(box.left + 1, box.bottom - 1);
         if (elt != bar) bar.style.pointerEvents = "none";
@@ -511,7 +413,6 @@
 
     cm.display.scrollbars = new CodeMirror.scrollbarModel[cm.options.scrollbarStyle](function(node) {
       cm.display.wrapper.insertBefore(node, cm.display.scrollbarFiller);
-      // Prevent clicks in the scrollbars from killing focus
       on(node, "mousedown", function() {
         if (cm.state.focused) setTimeout(function() { cm.display.input.focus(); }, 0);
       });
@@ -536,8 +437,6 @@
     }
   }
 
-  // Re-synchronize the fake scrollbars with the actual size of the
-  // content.
   function updateScrollbarsInner(cm, measure) {
     var d = cm.display;
     var sizes = d.scrollbars.update(measure);
@@ -558,17 +457,13 @@
     } else d.gutterFiller.style.display = "";
   }
 
-  // Compute the lines that are visible in a given viewport (defaults
-  // the the current scroll position). viewport may contain top,
-  // height, and ensure (see op.scrollToPos) properties.
   function visibleLines(display, doc, viewport) {
     var top = viewport && viewport.top != null ? Math.max(0, viewport.top) : display.scroller.scrollTop;
     top = Math.floor(top - paddingTop(display));
     var bottom = viewport && viewport.bottom != null ? viewport.bottom : top + display.wrapper.clientHeight;
 
     var from = lineAtHeight(doc, top), to = lineAtHeight(doc, bottom);
-    // Ensure is a {from: {line, ch}, to: {line, ch}} object, and
-    // forces those lines into the viewport (if possible).
+    
     if (viewport && viewport.ensure) {
       var ensureFrom = viewport.ensure.from.line, ensureTo = viewport.ensure.to.line;
       if (ensureFrom < from) {
@@ -582,10 +477,6 @@
     return {from: from, to: Math.max(to, from + 1)};
   }
 
-  // LINE NUMBERS
-
-  // Re-align line numbers and gutter marks to compensate for
-  // horizontal scrolling.
   function alignHorizontally(cm) {
     var display = cm.display, view = display.view;
     if (!display.alignWidgets && (!display.gutters.firstChild || !cm.options.fixedGutter)) return;
@@ -602,9 +493,6 @@
       display.gutters.style.left = (comp + gutterW) + "px";
   }
 
-  // Used to ensure that the line number gutter is still the right
-  // size for the current document size. Returns true when an update
-  // is needed.
   function maybeUpdateLineNumberWidth(cm) {
     if (!cm.options.lineNumbers) return false;
     var doc = cm.doc, last = lineNumberFor(cm.options, doc.first + doc.size - 1), display = cm.display;
@@ -627,20 +515,14 @@
     return String(options.lineNumberFormatter(i + options.firstLineNumber));
   }
 
-  // Computes display.scroller.scrollLeft + display.gutters.offsetWidth,
-  // but using getBoundingClientRect to get a sub-pixel-accurate
-  // result.
   function compensateForHScroll(display) {
     return display.scroller.getBoundingClientRect().left - display.sizer.getBoundingClientRect().left;
   }
 
-  // DISPLAY DRAWING
-
   function DisplayUpdate(cm, viewport, force) {
     var display = cm.display;
 
-    this.viewport = viewport;
-    // Store some values that we'll need later (but don't want to force a relayout for)
+    this.viewport = viewport;    
     this.visible = visibleLines(display, cm.doc, viewport);
     this.editorIsHidden = !display.wrapper.offsetWidth;
     this.wrapperHeight = display.wrapper.clientHeight;
@@ -671,9 +553,6 @@
     }
   }
 
-  // Does the actual updating of the line display. Bails out
-  // (returning false) when there is nothing to be done and forced is
-  // false.
   function updateDisplayIfNeeded(cm, update) {
     var display = cm.display, doc = cm.doc;
 
@@ -682,7 +561,6 @@
       return false;
     }
 
-    // Bail out if the visible area is already rendered and nothing changed.
     if (!update.force &&
         update.visible.from >= display.viewFrom && update.visible.to <= display.viewTo &&
         (display.updateLineNumbers == null || display.updateLineNumbers >= display.viewTo) &&
@@ -694,7 +572,6 @@
       update.dims = getDimensions(cm);
     }
 
-    // Compute a suitable new viewport (from & to)
     var end = doc.first + doc.size;
     var from = Math.max(update.visible.from - cm.options.viewportMargin, doc.first);
     var to = Math.min(end, update.visible.to + cm.options.viewportMargin);
@@ -710,7 +587,6 @@
     adjustView(cm, from, to);
 
     display.viewOffset = heightAtLine(getLine(cm.doc, display.viewFrom));
-    // Position the mover div to align with the current scroll position
     cm.display.mover.style.top = display.viewOffset + "px";
 
     var toUpdate = countDirtyView(cm);
@@ -718,19 +594,14 @@
         (display.updateLineNumbers == null || display.updateLineNumbers >= display.viewTo))
       return false;
 
-    // For big changes, we hide the enclosing element during the
-    // update, since that speeds up the operations on most browsers.
     var focused = activeElt();
     if (toUpdate > 4) display.lineDiv.style.display = "none";
     patchDisplay(cm, display.updateLineNumbers, update.dims);
     if (toUpdate > 4) display.lineDiv.style.display = "";
     display.renderedView = display.view;
-    // There might have been a widget with a focused element that got
-    // hidden or updated, if so re-focus it.
+
     if (focused && activeElt() != focused && focused.offsetHeight) focused.focus();
 
-    // Prevent selection and cursors from interfering with the scroll
-    // width and height.
     removeChildren(display.cursorDiv);
     removeChildren(display.selectionDiv);
     display.gutters.style.height = display.sizer.style.minHeight = 0;
@@ -794,8 +665,6 @@
     cm.display.gutters.style.height = (measure.docHeight + cm.display.barHeight + scrollGap(cm)) + "px";
   }
 
-  // Read the actual heights of the rendered lines, and update their
-  // stored heights to match.
   function updateHeightsInViewport(cm) {
     var display = cm.display;
     var prevBottom = display.lineDiv.offsetTop;

@@ -25,7 +25,6 @@ var _toggleFormat = (modifiers) => {
   if (modifiers.length === 0) {
     return;
   }
-  // exclude modifiers from selection
   let allModifiers = ['**', "__", "~~", "*", "_", "`"];
   let startPoint = cm.getCursor("start");
   let endPoint = cm.getCursor("end");
@@ -44,7 +43,6 @@ var _toggleFormat = (modifiers) => {
   }
   cm.setSelection(startPoint, endPoint);
 
-  // find modifiers around selection
   let foundModifiers = [];
   let modifierWidth = 0;
   let rangeStartPoint = new CodeMirror.Pos(startPoint.line, startPoint.ch);
@@ -70,7 +68,6 @@ var _toggleFormat = (modifiers) => {
     }
   }
 
-  // find given modifier in array(foundModifiers)
   let modifierIndex = -1;
   for (let i = 0; i < modifiers.length; i++) {
     modifierIndex = foundModifiers.indexOf(modifiers[i]);
@@ -79,7 +76,6 @@ var _toggleFormat = (modifiers) => {
     }
   }
 
-  // if modifier found, delete it from array(boundModifiers). or push it to array
   let modifierLength = 0;
   if (modifierIndex !== -1) {
     modifierLength = -foundModifiers[modifierIndex].length;
@@ -89,14 +85,12 @@ var _toggleFormat = (modifiers) => {
     modifierLength = modifiers[0].length;
   }
 
-  // replace text with modified modifiers
   let prefix = foundModifiers.join("");
   let suffix = foundModifiers.reverse().join("");
   cm.replaceRange(suffix, endPoint, rangeEndPoint);
   cm.replaceRange(prefix, rangeStartPoint, startPoint);
 
   startPoint.ch += modifierLength;
-  // only change endpoint when selection is in single line
   if (startPoint.line === endPoint.line) {
     endPoint.ch += modifierLength;
   }
@@ -205,33 +199,28 @@ var _toggleLine = (cm, name) => {
   cm.focus();
 }
 
-// function for drawing a link
 var drawLink = () => {
   var stat = getState(cm);
   var url = "http://";
   _replaceSelection(cm, stat.link, insertTexts.link, url);
 }
 
-// function for drawing an image
 var drawImage = () => {
   var stat = getState(cm);
   var url = "http://";
   _replaceSelection(cm, stat.image, insertTexts.image, url);
 }
 
-// function for drawing a image
 var drawTable = () => {
   var stat = getState(cm);
   _replaceSelection(cm, stat.table, insertTexts.table);
 }
 
-// function for drawing a horizontal rule.
 var drawHorizontalRule = () => {
   var stat = getState(cm);
   _replaceSelection(cm, stat.image, insertTexts.horizontalRule);
 }
 
-// function for adding heading
 var toggleHeadingSmaller = () => {
 	_toggleHeading("smaller");
 }

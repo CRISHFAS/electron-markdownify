@@ -14,7 +14,6 @@ var saveAs = () => {
       storage.set('markdown-savefile', {'filename' : fileName}, (error) => { if (error) alert(error); });
 
       var mdValue = cm.getValue();
-      // fileName is a string that contains the path and filename created in the save file dialog.
       fs.writeFile(fileName, mdValue, (err) => {
         if(err){
           alert("An error ocurred creating the file "+ err.message)
@@ -33,7 +32,6 @@ ipc.on('file-new', () => {
   cm.getDoc().setValue("");
 });
 
-// Handling file saving through IPCRenderer
 ipc.on('file-save', () => {
   storage.get('markdown-savefile', (error, data) => {
     if (error) {
@@ -50,7 +48,6 @@ ipc.on('file-save', () => {
       storage.set('markdown-savefile', {'filename' : fileName}, (error) => { if (error) alert(error); });
 
       var mdValue = cm.getValue();
-      // fileName is a string that contains the path and filename created in the save file dialog.
       fs.writeFile(fileName, mdValue, (err) => {
        if(err){
          alert("An error ocurred creating the file "+ err.message)
@@ -67,7 +64,6 @@ ipc.on('file-save', () => {
 
 ipc.on('file-save-as', saveAs);
 
-// Handling file opening through IPCRenderer
 ipc.on('file-open', () => {
   storage.get('markdown-savefile', (error, data) => {
     if (error) alert(error);
@@ -86,7 +82,6 @@ ipc.on('file-open', () => {
       storage.set('markdown-savefile', {'filename' : fileName[0]}, (error) => { if (error) alert(error); });
 
       var mdValue = cm.getValue();
-      // fileName is a string that contains the path and filename created in the save file dialog.
       fs.readFile(fileName[0], 'utf-8', (err, data) => {
         if(err){
           alert("An error ocurred while opening the file "+ err.message)
@@ -137,7 +132,6 @@ ipc.on('ctrl+shift+f', () => {
 
 ipc.on('file-pdf', () => {
 
-  // Only save PDF files
   options = {
     filters: [
       {name: 'PDF', extensions: ['pdf']}

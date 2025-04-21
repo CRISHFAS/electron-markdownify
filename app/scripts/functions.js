@@ -42,7 +42,6 @@ var showToolBar = () => {
   }
 }
 
-// Generations and clean state of CodeMirror
 var getGeneration = () => {
   return this.cm.doc.changeGeneration();
 }
@@ -55,7 +54,6 @@ var isClean = () => {
   return this.cm.doc.isClean(this.latestGeneration);
 }
 
-// Update window title on various events
 var updateWindowTitle = (path) => {
   var appName = "Markdownify",
       isClean = this.isClean(),

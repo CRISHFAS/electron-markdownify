@@ -2,11 +2,11 @@
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
 (function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
+  if (typeof exports == "object" && typeof module == "object") 
     mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
+  else if (typeof define == "function" && define.amd) 
     define(["../../lib/codemirror"], mod);
-  else // Plain browser env
+  else 
     mod(CodeMirror);
 })(function(CodeMirror) {
   "use strict";
@@ -19,11 +19,7 @@
     pos = pos ? doc.clipPos(pos) : Pos(0, 0);
     this.pos = {from: pos, to: pos};
 
-    // The matches method is filled in based on the type of query.
-    // It takes a position and a direction, and returns an object
-    // describing the next occurrence of the query, or null if no
-    // more matches were found.
-    if (typeof query != "string") { // Regexp match
+    if (typeof query != "string") { 
       if (!query.global) query = new RegExp(query.source, query.ignoreCase ? "ig" : "g");
       this.matches = function(reverse, pos) {
         if (reverse) {
@@ -57,16 +53,14 @@
                   to: Pos(pos.line, start + matchLen),
                   match: match};
       };
-    } else { // String query
+    } else { 
       var origQuery = query;
       if (caseFold) query = query.toLowerCase();
       var fold = caseFold ? function(str){return str.toLowerCase();} : function(str){return str;};
       var target = query.split("\n");
-      // Different methods for single-line and multi-line queries
       if (target.length == 1) {
         if (!query.length) {
-          // Empty string would match anything and never progress, so
-          // we define it to match nothing instead.
+        
           this.matches = function() {};
         } else {
           this.matches = function(reverse, pos) {
@@ -157,8 +151,7 @@
     }
   };
 
-  // Maps a position in a case-folded line back to a position in the original line
-  // (compensating for codepoints increasing in number during folding)
+
   function adjustPos(orig, folded, pos) {
     if (orig.length == folded.length) return pos;
     for (var pos1 = Math.min(pos, orig.length);;) {

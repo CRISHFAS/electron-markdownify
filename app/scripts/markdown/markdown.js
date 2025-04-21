@@ -1,12 +1,9 @@
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
 (function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
+  if (typeof exports == "object" && typeof module == "object") 
     mod(require("../../lib/codemirror"), require("../xml/xml"), require("../meta"));
   else if (typeof define == "function" && define.amd) // AMD
     define(["../../lib/codemirror", "../xml/xml", "../meta"], mod);
-  else // Plain browser env
+  else 
     mod(CodeMirror);
 })(function(CodeMirror) {
 "use strict";
@@ -25,33 +22,20 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
     return mode.name == "null" ? null : mode;
   }
 
-  // Should characters that affect highlighting be highlighted separate?
-  // Does not include characters that will be output (such as `1.` and `-` for lists)
   if (modeCfg.highlightFormatting === undefined)
     modeCfg.highlightFormatting = false;
 
-  // Maximum number of nested blockquotes. Set to 0 for infinite nesting.
-  // Excess `>` will emit `error` token.
   if (modeCfg.maxBlockquoteDepth === undefined)
     modeCfg.maxBlockquoteDepth = 0;
 
-  // Should underscores in words open/close em/strong?
   if (modeCfg.underscoresBreakWords === undefined)
     modeCfg.underscoresBreakWords = true;
 
-  // Use `fencedCodeBlocks` to configure fenced code blocks. false to
-  // disable, string to specify a precise regexp that the fence should
-  // match, and true to allow three or more backticks or tildes (as
-  // per CommonMark).
-
-  // Turn on task lists? ("- [ ] " and "- [x] ")
   if (modeCfg.taskLists === undefined) modeCfg.taskLists = false;
 
-  // Turn on strikethrough syntax
   if (modeCfg.strikethrough === undefined)
     modeCfg.strikethrough = false;
 
-  // Allow token types to be overridden by user-provided token types.
   if (modeCfg.tokenTypeOverrides === undefined)
     modeCfg.tokenTypeOverrides = {};
 
@@ -83,7 +67,7 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
   var hrRE = /^([*\-_])(?:\s*\1){2,}\s*$/
   ,   ulRE = /^[*\-+]\s+/
   ,   olRE = /^[0-9]+([.)])\s+/
-  ,   taskListRE = /^\[(x| )\](?=\s)/ // Must follow ulRE or olRE
+  ,   taskListRE = /^\[(x| )\](?=\s)/ 
   ,   atxHeaderRE = modeCfg.allowAtxHeaderWithoutSpace ? /^(#+)/ : /^(#+)(?: |$)/
   ,   setextHeaderRE = /^ *(?:\={1,}|-{1,})\s*$/
   ,   textRE = /^[^#!\[\]*_\\<>` "'(~]+/
@@ -104,29 +88,19 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
     return !line || !/\S/.test(line.string)
   }
 
-  // Blocks
-
   function blankLine(state) {
-    // Reset linkTitle state
     state.linkTitle = false;
-    // Reset EM state
     state.em = false;
-    // Reset STRONG state
     state.strong = false;
-    // Reset strikethrough state
     state.strikethrough = false;
-    // Reset state.quote
     state.quote = 0;
-    // Reset state.indentedCode
     state.indentedCode = false;
     if (htmlModeMissing && state.f == htmlBlock) {
       state.f = inlineNormal;
       state.block = blockNormal;
     }
-    // Reset state.trailingSpace
     state.trailingSpace = 0;
     state.trailingSpaceNewLine = false;
-    // Mark this line as blank
     state.prevLine = state.thisLine
     state.thisLine = null
     return null;
@@ -149,7 +123,7 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
         state.list = null;
       } else if (state.indentation > 0) {
         state.list = null;
-      } else { // No longer a list
+      } else { 
         state.list = false;
       }
     }
@@ -198,14 +172,10 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
       state.indentation = stream.column() + stream.current().length;
       state.list = true;
 
-      // While this list item's marker's indentation
-      // is less than the deepest list item's content's indentation,
-      // pop the deepest list item indentation off the stack.
       while (state.listStack && stream.column() < state.listStack[state.listStack.length - 1]) {
         state.listStack.pop();
       }
 
-      // Add this list item's content's indentation to the stack
       state.listStack.push(state.indentation);
 
       if (modeCfg.taskLists && stream.match(taskListRE, false)) {
@@ -216,7 +186,6 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
       return getType(state);
     } else if (modeCfg.fencedCodeBlocks && (match = stream.match(fencedCodeRE, true))) {
       state.fencedChars = match[1]
-      // try switching mode
       state.localMode = getMode(match[2]);
       if (state.localMode) state.localState = state.localMode.startState();
       state.f = state.block = local;
@@ -268,7 +237,6 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
     return returnType;
   }
 
-  // Inline
   function getType(state) {
     var styles = [];
 
@@ -284,8 +252,6 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
           styles.push(tokenTypes.formatting + "-" + state.formatting[i] + "-" + state.header);
         }
 
-        // Add `formatting-quote` and `formatting-quote-#` for blockquotes
-        // Add `error` instead if the maximum blockquote nesting depth is passed
         if (state.formatting[i] === "quote") {
           if (!modeCfg.maxBlockquoteDepth || modeCfg.maxBlockquoteDepth >= state.quote) {
             styles.push(tokenTypes.formatting + "-" + state.formatting[i] + "-" + state.quote);
@@ -307,7 +273,7 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
 
     if (state.linkHref) {
       styles.push(tokenTypes.linkHref, "url");
-    } else { // Only apply inline styles to non-url text
+    } else { 
       if (state.strong) { styles.push(tokenTypes.strong); }
       if (state.em) { styles.push(tokenTypes.em); }
       if (state.strikethrough) { styles.push(tokenTypes.strikethrough); }
@@ -320,7 +286,6 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
     if (state.quote) {
       styles.push(tokenTypes.quote);
 
-      // Add `quote-#` where the maximum for `#` is modeCfg.maxBlockquoteDepth
       if (!modeCfg.maxBlockquoteDepth || modeCfg.maxBlockquoteDepth >= state.quote) {
         styles.push(tokenTypes.quote + "-" + state.quote);
       } else {
@@ -360,7 +325,7 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
     if (typeof style !== 'undefined')
       return style;
 
-    if (state.list) { // List marker (*, +, -, 1., etc)
+    if (state.list) { 
       state.list = null;
       return getType(state);
     }
@@ -382,12 +347,10 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
       return getType(state);
     }
 
-    // Get sol() value now, before character is consumed
     var sol = stream.sol();
 
     var ch = stream.next();
 
-    // Matches link titles present on next line
     if (state.linkTitle) {
       state.linkTitle = false;
       var matchCh = ch;
@@ -401,7 +364,6 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
       }
     }
 
-    // If this block is changed, it may need to be updated in GFM mode
     if (ch === '`') {
       var previousFormatting = state.formatting;
       if (modeCfg.highlightFormatting) state.formatting = "code";
@@ -410,7 +372,7 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
       if (state.code == 0) {
         state.code = count
         return getType(state)
-      } else if (count == state.code) { // Must be exact
+      } else if (count == state.code) { 
         var t = getType(state)
         state.code = 0
         return t
@@ -505,31 +467,30 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
     }
     if (ch === '*' || (ch === '_' && !ignoreUnderscore)) {
       if (sol && stream.peek() === ' ') {
-        // Do nothing, surrounded by newline and space
-      } else if (state.strong === ch && stream.eat(ch)) { // Remove STRONG
+      } else if (state.strong === ch && stream.eat(ch)) { 
         if (modeCfg.highlightFormatting) state.formatting = "strong";
         var t = getType(state);
         state.strong = false;
         return t;
-      } else if (!state.strong && stream.eat(ch)) { // Add STRONG
+      } else if (!state.strong && stream.eat(ch)) { 
         state.strong = ch;
         if (modeCfg.highlightFormatting) state.formatting = "strong";
         return getType(state);
-      } else if (state.em === ch) { // Remove EM
+      } else if (state.em === ch) { 
         if (modeCfg.highlightFormatting) state.formatting = "em";
         var t = getType(state);
         state.em = false;
         return t;
-      } else if (!state.em) { // Add EM
+      } else if (!state.em) { 
         state.em = ch;
         if (modeCfg.highlightFormatting) state.formatting = "em";
         return getType(state);
       }
     } else if (ch === ' ') {
-      if (stream.eat('*') || stream.eat('_')) { // Probably surrounded by spaces
-        if (stream.peek() === ' ') { // Surrounded by spaces, ignore
+      if (stream.eat('*') || stream.eat('_')) { 
+        if (stream.peek() === ' ') { 
           return getType(state);
-        } else { // Not surrounded by spaces, back up pointer
+        } else { 
           stream.backUp(1);
         }
       }
@@ -537,21 +498,21 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
 
     if (modeCfg.strikethrough) {
       if (ch === '~' && stream.eatWhile(ch)) {
-        if (state.strikethrough) {// Remove strikethrough
+        if (state.strikethrough) {
           if (modeCfg.highlightFormatting) state.formatting = "strikethrough";
           var t = getType(state);
           state.strikethrough = false;
           return t;
-        } else if (stream.match(/^[^\s]/, false)) {// Add strikethrough
+        } else if (stream.match(/^[^\s]/, false)) {
           state.strikethrough = true;
           if (modeCfg.highlightFormatting) state.formatting = "strikethrough";
           return getType(state);
         }
       } else if (ch === ' ') {
-        if (stream.match(/^~~/, true)) { // Probably surrounded by space
-          if (stream.peek() === ' ') { // Surrounded by spaces, ignore
+        if (stream.match(/^~~/, true)) { 
+          if (stream.peek() === ' ') { 
             return getType(state);
-          } else { // Not surrounded by spaces, back up pointer
+          } else { 
             stream.backUp(2);
           }
         }
@@ -590,7 +551,6 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
   }
 
   function linkHref(stream, state) {
-    // Check if space, and return NULL if so (to avoid marking the space)
     if(stream.eatSpace()){
       return null;
     }
@@ -628,7 +588,7 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
   function footnoteLink(stream, state) {
     if (stream.match(/^([^\]\\]|\\.)*\]:/, false)) {
       state.f = footnoteLinkInside;
-      stream.next(); // Consume [
+      stream.next(); 
       if (modeCfg.highlightFormatting) state.formatting = "link";
       state.linkText = true;
       return getType(state);
@@ -651,16 +611,14 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
   }
 
   function footnoteUrl(stream, state) {
-    // Check if space, and return NULL if so (to avoid marking the space)
     if(stream.eatSpace()){
       return null;
     }
-    // Match URL
+   
     stream.match(/^[^\s]+/, true);
-    // Check for link title
-    if (stream.peek() === undefined) { // End of line, set flag to check next line
+    if (stream.peek() === undefined) { 
       state.linkTitle = true;
-    } else { // More content on line, check if link title
+    } else { 
       stream.match(/^(?:\s+(?:"(?:[^"\\]|\\\\|\\.)+"|'(?:[^'\\]|\\\\|\\.)+'|\((?:[^)\\]|\\\\|\\.)+\)))?/, true);
     }
     state.f = state.inline = inlineNormal;
@@ -670,10 +628,8 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
   var savedInlineRE = [];
   function inlineRE(endChar) {
     if (!savedInlineRE[endChar]) {
-      // Escape endChar for RegExp (taken from http://stackoverflow.com/a/494122/526741)
       endChar = (endChar+'').replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
-      // Match any non-endChar, escaped character, as well as the closing
-      // endChar.
+     
       savedInlineRE[endChar] = new RegExp('^(?:[^\\\\]|\\\\.)*?(' + endChar + ')');
     }
     return savedInlineRE[endChar];
@@ -752,13 +708,11 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
 
     token: function(stream, state) {
 
-      // Reset state.formatting
       state.formatting = false;
 
       if (stream != state.thisLine) {
         var forceBlankLine = state.header || state.hr;
 
-        // Reset state.header and state.hr
         state.header = 0;
         state.hr = false;
 
@@ -771,10 +725,8 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
         state.prevLine = state.thisLine
         state.thisLine = stream
 
-        // Reset state.taskList
         state.taskList = false;
 
-        // Reset state.trailingSpace
         state.trailingSpace = 0;
         state.trailingSpaceNewLine = false;
 

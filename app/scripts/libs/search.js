@@ -12,9 +12,9 @@
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     mod(require("../../lib/codemirror"), require("./searchcursor"), require("../dialog/dialog"));
-  else if (typeof define == "function" && define.amd) // AMD
+  else if (typeof define == "function" && define.amd) 
     define(["../../lib/codemirror", "./searchcursor", "../dialog/dialog"], mod);
-  else // Plain browser env
+  else 
     mod(CodeMirror);
 })(function(CodeMirror) {
   "use strict";
@@ -53,7 +53,7 @@
   }
 
   function getSearchCursor(cm, query, pos) {
-    // Heuristic: if the query string is all lowercase, do a case insensitive search.
+
     return cm.getSearchCursor(query, pos, queryCaseInsensitive(query));
   }
 
@@ -88,7 +88,7 @@
     var isRE = query.match(/^\/(.*)\/([a-z]*)$/);
     if (isRE) {
       try { query = new RegExp(isRE[1], isRE[2].indexOf("i") == -1 ? "" : "i"); }
-      catch(e) {} // Not a regular expression after all, do a string search
+      catch(e) {} 
     } else {
       query = parseString(query)
     }

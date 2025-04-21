@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-      <title>New document - Markdownify</title>
+      <title>Nuevo documento - Markdownify</title>
       <link href="app/styles/bootstrap.min.css" rel="stylesheet">
       <link href="app/styles/style.css" rel="stylesheet">
       <link rel="stylesheet" href="app/styles/codemirror.css">
@@ -19,49 +19,49 @@
           </span>
           <span class="switch-field">
             <input type="radio" name="changeTheme" id="lightThemeRadio" value="light" onclick="changeTheme(this);" title="Light Mode" checked="checked"/>
-            <label for="lightThemeRadio">Light</label>
+            <label for="lightThemeRadio">Claro</label>
             <input type="radio" name="changeTheme" id="darkThemeRadio" value="dark" onclick="changeTheme(this);" title="Dark Mode" />
-            <label for="darkThemeRadio">Dark</label>
+            <label for="darkThemeRadio">Oscuro</label>
           </span>
         </div>
         <div class="pref" id="pref">
           <div class="module">
-            <label><input type="checkbox" id="syncScroll"> Sync Scrolling</label>
+            <label><input type="checkbox" id="syncScroll"> Desplazamiento sincronizado</label>
           </div>
           <div class="switch-field preview-pane">
             <input type="radio" name="showPreference" id="htmlRadio" value="html" onclick="clkPref(this);"/>
             <label for="htmlRadio">HTML</label>
             <input type="radio" name="showPreference" id="previewRadio" value="preview" onclick="clkPref(this);" checked="checked" />
-            <label for="previewRadio">Preview</label>
+            <label for="previewRadio">Avance</label>
           </div>
 
         </div>
       </div>
       <div id="toolbarArea">
         <div style="padding-left:10px;">
-          <a onclick="toggleFormat('bold');" title="Bold [Ctrl+B]" class="fa fa-bold editor-toolbar"></a>
-          <a onclick="toggleFormat('italic');" title="Italic [Ctrl+I]" class="fa fa-italic editor-toolbar"></a>
-          <a onclick="toggleHeadingSmaller();" title="Header [Ctrl+H]" class="fa fa-header editor-toolbar"></a>
-          <a onclick="toggleFormat('strikethrough');" title="StrikeThrough [Ctrl+/]" class="fa fa-strikethrough editor-toolbar"></a>
+          <a onclick="toggleFormat('bold');" title="Negrita [Ctrl+B]" class="fa fa-bold editor-toolbar"></a>
+          <a onclick="toggleFormat('italic');" title="Cursiva [Ctrl+I]" class="fa fa-italic editor-toolbar"></a>
+          <a onclick="toggleHeadingSmaller();" title="Encabezado [Ctrl+H]" class="fa fa-header editor-toolbar"></a>
+          <a onclick="toggleFormat('strikethrough');" title="Tachar [Ctrl+/]" class="fa fa-strikethrough editor-toolbar"></a>
           <i class="separator">|</i>
-          <a onclick="toggleBlockquote();" title="Quote" class="fa fa-quote-left editor-toolbar"></a>
-          <a onclick="toggleUnorderedList();" title="Unordered List" class="fa fa-list-ul editor-toolbar"></a>
-          <a onclick="toggleOrderedList();" title="Ordered List" class="fa fa-list-ol editor-toolbar"></a>
+          <a onclick="toggleBlockquote();" title="Citar" class="fa fa-quote-left editor-toolbar"></a>
+          <a onclick="toggleUnorderedList();" title="Lista desordenada" class="fa fa-list-ul editor-toolbar"></a>
+          <a onclick="toggleOrderedList();" title="Lista ordenada" class="fa fa-list-ol editor-toolbar"></a>
           <i class="separator">|</i>
-          <a onclick="toggleLatex();" title="Math" class="fa fa-superscript editor-toolbar"></a>
+          <a onclick="toggleLatex();" title="Matematica" class="fa fa-superscript editor-toolbar"></a>
           <i class="separator">|</i>
-          <a onclick="drawLink();" title="Create Link [Ctrl+L]" class="fa fa-link editor-toolbar"></a>
-          <a onclick="drawImage();" title="Insert Image [Ctrl+Alt+I]" class="fa fa-picture-o editor-toolbar"></a>
-          <a onclick="drawTable();" title="Insert Table [Ctrl+Shift+T]" class="fa fa-table editor-toolbar"></a>
-          <a onclick="drawHorizontalRule();" title="Insert Horizontal Rule" class="fa fa-minus editor-toolbar"></a>
+          <a onclick="drawLink();" title="Crear enlace [Ctrl+L]" class="fa fa-link editor-toolbar"></a>
+          <a onclick="drawImage();" title="Insertar imagen [Ctrl+Alt+I]" class="fa fa-picture-o editor-toolbar"></a>
+          <a onclick="drawTable();" title="Insertar Tabla [Ctrl+Shift+T]" class="fa fa-table editor-toolbar"></a>
+          <a onclick="drawHorizontalRule();" title="Insertar regla horizontal" class="fa fa-minus editor-toolbar"></a>
           <i class="separator">|</i>
-          <a onclick="toggleSidePanel();" title="Side-By-Side Panel Toggle" class="fa fa-columns editor-toolbar"></a>
-          <a data-toggle="modal" data-target="#myModal" title="Markdown Help" class="fa fa-question-circle editor-toolbar"></a>
+          <a onclick="toggleSidePanel();" title="Alternar panel lado a lado" class="fa fa-columns editor-toolbar"></a>
+          <a data-toggle="modal" data-target="#myModal" title="Ayuda de Markdown" class="fa fa-question-circle editor-toolbar"></a>
         </div>
       </div>
       <section class="row" id="editArea" style="padding-top: 24px;">
           <div class="col-md-6 full-height cmpad" style="box-shadow: -10px 13px 6px 10px rgba(0,0,0,0.4);" id="textPanel">
-            <textarea  id="plainText" placeholder="Write your Markdown here.." autofocus></textarea>
+            <textarea  id="plainText" placeholder="Escribe tu Markdown aquí." autofocus></textarea>
           </div>
           <div class="col-md-6 full-height" style="overflow-y: auto;display:block;padding-top: 5px;" id="previewPanel">
             <div id="markdown"></div>
@@ -75,26 +75,26 @@
           <div class="modal-content">
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal">&times;</button>
-              <h4 class="modal-title">Markdown Help</h4>
+              <h4 class="modal-title">Ayuda de Markdown</h4>
             </div>
             <div class="modal-body">
               <section class="modal--default__content" id="modal-body-region">
                 <table class="markdown-help-content">
                   <tbody>
                       <tr>
-                        <td><strong>Bold</strong></td>
+                        <td><strong>Negrita</strong></td>
                         <td>**bold**</td>
                       </tr>
                       <tr>
-                        <td><i>Italics</i></td>
+                        <td><i>Cursiva</i></td>
                         <td>*italics*</td>
                       </tr>
                       <tr>
-                        <td><del>Strikethrough</del></td>
+                        <td><del>Tachar</del></td>
                         <td>~~strikethrough~~</td>
                       </tr>
                       <tr>
-                        <td>Header</td>
+                        <td>Encabezado</td>
                         <td># H1     ## H2     ### H3</td>
                       </tr>
                       <tr>
@@ -102,7 +102,7 @@
                         <td>* item</td>
                       </tr>
                       <tr>
-                        <td>Blockquote</td>
+                        <td>Cita en bloque</td>
                         <td>&gt; blockquote</td>
                       </tr>
                       <tr>
@@ -114,7 +114,7 @@
                         <td>[title](http://)</td>
                       </tr>
                       <tr>
-                        <td>Image</td>
+                        <td>Imagen</td>
                         <td>![alt](http://)</td>
                       </tr>
                       <tr>
@@ -134,7 +134,7 @@
               </section>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
             </div>
           </div>
         </div>
