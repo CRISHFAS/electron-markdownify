@@ -59,6 +59,6 @@ Este software utiliza los siguientes paquetes de código abierto:
 - Emojis are taken from [here](https://github.com/arvida/emoji-cheat-sheet.com)
 - [highlight.js](https://highlightjs.org/)
 
-## Related
+## Relacionado
 
-[Try Web version of Markdownify](https://notepad.js.org/markdown-editor/)
+[Prueba la app](https://github.com/CRISHFAS/electron-markdownify/releases/tag/v1.4.1)
