@@ -35,7 +35,7 @@
 Para clonar y ejecutar esta aplicación, necesitas tener instalado [Git](https://git-scm.com) y [Node.js](https://nodejs.org/en/download/) (que incluye [npm](http://npmjs.com)). En tu línea de comandos:
 
 ```bash
-$ git clone https://github.com/CRISHFAS/electron-markdownify
+$ git clone git@github.com:CRISHFAS/electron-markdownify.git
 
 $ cd electron-markdownify
 
