@@ -2,8 +2,6 @@
 
 <h4 align="center">Una aplicación de escritorio minimalista para editar Markdown, construida sobre <a href="http://electron.atom.io" target="_blank">Electron</a>.</h4>
 
-![screenshot](https://raw.githubusercontent.com/amitmerchant1990/electron-markdownify/master/app/img/markdownify.gif)
-
 ## Características
 
 * **Vista previa en vivo** - Haz cambios y observa los resultados en tiempo real.
